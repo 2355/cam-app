@@ -19,9 +19,36 @@ export default function Page() {
           throw new Error('このブラウザではカメラAPIがサポートされていません。HTTPSでアクセスしてください。');
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log('Requesting camera access...');
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 320 },
+            height: { ideal: 240 },
+            facingMode: 'user'
+          } 
+        });
+        
+        console.log('Camera access granted, setting up video element...');
+        
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          
+          // Add event listeners to ensure video plays
+          videoRef.current.onloadedmetadata = () => {
+            console.log('Video metadata loaded');
+            if (videoRef.current) {
+              videoRef.current.play().catch(e => console.log('Play failed:', e));
+            }
+          };
+          
+          videoRef.current.oncanplay = () => {
+            console.log('Video can start playing');
+          };
+          
+          videoRef.current.onplaying = () => {
+            console.log('Video is now playing');
+          };
+          
           setError(null);
         }
       } catch (err) {
@@ -87,11 +114,25 @@ export default function Page() {
         </div>
       )}
 
-      {!error && !isLoading && (
+      {!error && (
         <>
-          <video ref={videoRef} autoPlay playsInline width="320" height="240" />
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            muted
+            width="320" 
+            height="240"
+            style={{
+              border: '2px solid #ddd',
+              borderRadius: '8px',
+              backgroundColor: '#f0f0f0',
+              display: 'block',
+              margin: '0 auto'
+            }}
+          />
           <br />
-          <CameraButton onClick={takePhoto} />
+          {!isLoading && <CameraButton onClick={takePhoto} />}
         </>
       )}
 
