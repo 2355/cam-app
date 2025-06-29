@@ -9,13 +9,31 @@ export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isCameraOn, setIsCameraOn] = useState(false);
 
   useEffect(() => {
     const startCamera = async () => {
+      if (!isCameraOn) {
+        // Stop existing stream if camera is turned off
+        setStream(prevStream => {
+          if (prevStream) {
+            prevStream.getTracks().forEach(track => track.stop());
+          }
+          return null;
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+        setIsLoading(false);
+        return;
+      }
+
       try {
+        setIsLoading(true);
+        
         // Stop existing stream if any
         setStream(prevStream => {
           if (prevStream) {
@@ -75,7 +93,7 @@ export default function Page() {
     };
 
     startCamera();
-  }, [facingMode]);
+  }, [facingMode, isCameraOn]);
 
   // Cleanup function to stop camera when component unmounts
   useEffect(() => {
@@ -107,11 +125,38 @@ export default function Page() {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
+  const toggleCamera = () => {
+    setIsCameraOn(prev => !prev);
+    if (isCameraOn) {
+      // カメラをオフにする場合、写真もクリア
+      setPhoto(null);
+    }
+  };
+
   return (
     <main style={{ textAlign: 'center', padding: '2rem' }}>
       <h1>📷 カメラアプリ（App Router）</h1>
 
-      {isLoading && (
+      {/* Camera On/Off Toggle */}
+      <div style={{ margin: '2rem' }}>
+        <button
+          onClick={toggleCamera}
+          style={{
+            padding: '1rem 2rem',
+            fontSize: '1.1rem',
+            backgroundColor: isCameraOn ? '#dc3545' : '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          {isCameraOn ? '📹 カメラをオフ' : '📷 カメラをオン'}
+        </button>
+      </div>
+
+      {isLoading && isCameraOn && (
         <div style={{ margin: '2rem', fontSize: '1.2rem' }}>
           カメラを起動中...
         </div>
@@ -139,7 +184,22 @@ export default function Page() {
         </div>
       )}
 
-      {!error && (
+      {!isCameraOn && !error && (
+        <div style={{
+          margin: '2rem',
+          padding: '2rem',
+          backgroundColor: '#f8f9fa',
+          border: '2px dashed #dee2e6',
+          borderRadius: '8px',
+          color: '#6c757d'
+        }}>
+          <p style={{ fontSize: '1.2rem', margin: '0' }}>
+            📷 カメラをオンにして撮影を開始してください
+          </p>
+        </div>
+      )}
+
+      {!error && isCameraOn && (
         <>
           <video 
             ref={videoRef} 
