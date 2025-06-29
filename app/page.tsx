@@ -8,16 +8,31 @@ export default function Page() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const startCamera = async () => {
       try {
+        // Check if mediaDevices is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('このブラウザではカメラAPIがサポートされていません。HTTPSでアクセスしてください。');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          setError(null);
         }
       } catch (err) {
         console.error('カメラの起動に失敗しました:', err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('カメラの起動に失敗しました。HTTPSでアクセスするか、localhostを使用してください。');
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -44,9 +59,41 @@ export default function Page() {
     <main style={{ textAlign: 'center', padding: '2rem' }}>
       <h1>📷 カメラアプリ（App Router）</h1>
 
-      <video ref={videoRef} autoPlay playsInline width="320" height="240" />
-      <br />
-      <CameraButton onClick={takePhoto} />
+      {isLoading && (
+        <div style={{ margin: '2rem', fontSize: '1.2rem' }}>
+          カメラを起動中...
+        </div>
+      )}
+
+      {error && (
+        <div style={{ 
+          margin: '2rem', 
+          padding: '1rem', 
+          backgroundColor: '#ffebee', 
+          border: '1px solid #f44336', 
+          borderRadius: '8px',
+          color: '#c62828',
+          fontSize: '1rem'
+        }}>
+          <strong>エラー:</strong> {error}
+          <br />
+          <br />
+          <strong>解決方法:</strong>
+          <ul style={{ textAlign: 'left', maxWidth: '500px', margin: '0 auto' }}>
+            <li>HTTPSでアクセスしてください（例: https://192.168.x.x:3000）</li>
+            <li>または、localhost:3000 でアクセスしてください</li>
+            <li>ブラウザでカメラの許可を確認してください</li>
+          </ul>
+        </div>
+      )}
+
+      {!error && !isLoading && (
+        <>
+          <video ref={videoRef} autoPlay playsInline width="320" height="240" />
+          <br />
+          <CameraButton onClick={takePhoto} />
+        </>
+      )}
 
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
