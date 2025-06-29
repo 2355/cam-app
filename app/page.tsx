@@ -10,28 +10,39 @@ export default function Page() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     const startCamera = async () => {
       try {
+        // Stop existing stream if any
+        setStream(prevStream => {
+          if (prevStream) {
+            prevStream.getTracks().forEach(track => track.stop());
+          }
+          return null;
+        });
+
         // Check if mediaDevices is available
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error('このブラウザではカメラAPIがサポートされていません。HTTPSでアクセスしてください。');
         }
 
         console.log('Requesting camera access...');
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        const newStream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
             width: { ideal: 320 },
             height: { ideal: 240 },
-            facingMode: 'user'
+            facingMode: facingMode
           } 
         });
         
         console.log('Camera access granted, setting up video element...');
+        setStream(newStream);
         
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = newStream;
           
           // Add event listeners to ensure video plays
           videoRef.current.onloadedmetadata = () => {
@@ -64,7 +75,16 @@ export default function Page() {
     };
 
     startCamera();
-  }, []);
+  }, [facingMode]);
+
+  // Cleanup function to stop camera when component unmounts
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
 
   const takePhoto = () => {
     const video = videoRef.current;
@@ -80,6 +100,11 @@ export default function Page() {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL('image/png');
     setPhoto(dataUrl);
+  };
+
+  const switchCamera = () => {
+    setIsLoading(true);
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
   return (
@@ -132,7 +157,25 @@ export default function Page() {
             }}
           />
           <br />
-          {!isLoading && <CameraButton onClick={takePhoto} />}
+          {!isLoading && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', alignItems: 'center' }}>
+              <button
+                onClick={switchCamera}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.9rem',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                🔄 {facingMode === 'user' ? 'アウトカメラ' : 'インカメラ'}
+              </button>
+              <CameraButton onClick={takePhoto} />
+            </div>
+          )}
         </>
       )}
 
