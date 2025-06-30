@@ -128,10 +128,7 @@ export default function Page() {
 
   const toggleCamera = () => {
     setIsCameraOn(prev => !prev);
-    if (isCameraOn) {
-      // カメラをオフにする場合、写真もクリア
-      setPhoto(null);
-    }
+    // カメラをオフにしても写真とテキスト結果は保持する
   };
 
   return (
