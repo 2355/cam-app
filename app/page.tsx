@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import CameraButton from './components/CameraButton';
 import PhotoDisplay from './components/PhotoDisplay';
+import ImageAnalysis from './components/ImageAnalysis';
 
 export default function Page() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -242,6 +243,7 @@ export default function Page() {
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       <PhotoDisplay photo={photo} />
+      <ImageAnalysis photo={photo} />
     </main>
   );
 }
