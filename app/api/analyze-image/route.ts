@@ -10,11 +10,11 @@ try {
     throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON is not set');
   }
 
-  // client = new ImageAnnotatorClient({
-  //   credentials: JSON.parse(credentials),
-  //   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  // });
-  client = new ImageAnnotatorClient();
+  client = new ImageAnnotatorClient({
+    credentials: JSON.parse(credentials),
+    projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+  });
+  // client = new ImageAnnotatorClient();
 } catch (error) {
   console.error('Failed to initialize Google Cloud Vision client:', error);
 }
