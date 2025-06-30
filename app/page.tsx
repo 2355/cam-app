@@ -133,7 +133,7 @@ export default function Page() {
 
   return (
     <main style={{ textAlign: 'center', padding: '2rem' }}>
-      <h1>📷 カメラアプリ（App Router）</h1>
+      <h1>📷 カメラ検証アプリ</h1>
 
       {/* Camera On/Off Toggle */}
       <div style={{ margin: '2rem' }}>

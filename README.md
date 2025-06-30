@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📷 カメラ検証アプリ
 
-## Getting Started
+ブラウザでカメラを使った写真撮影と、Google Cloud Vision APIを使用したテキスト解析を行うWebアプリケーションです。
 
-First, run the development server:
+## 🌟 機能
+
+- **📱 カメラ撮影機能**
+  - インカメラ・アウトカメラの切り替え
+  - カメラのオン・オフ切り替え
+  - プライバシー配慮（デフォルトでカメラオフ）
+
+- **📝 テキスト解析機能**
+  - Google Cloud Vision APIによる文字認識
+  - 撮影した画像からテキストを自動抽出
+  - 全体テキスト・個別要素の表示
+
+- **🔧 技術仕様**
+  - Next.js 15 (App Router)
+  - TypeScript
+  - Google Cloud Vision API
+  - HTTPS対応（モバイルデバイス対応）
+
+## 🚀 セットアップ
+
+### 1. 依存関係のインストール
 
 ```bash
-npm run dev:https
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Google Cloud Vision API の設定
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. [Google Cloud Console](https://console.cloud.google.com/)でプロジェクトを作成
+2. Vision APIを有効化
+3. サービスアカウントを作成し、認証情報をダウンロード
+4. `.env.local`ファイルを作成：
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Google Cloud Vision API設定
+GOOGLE_APPLICATION_CREDENTIALS_JSON={"type":"service_account",...}
+GOOGLE_CLOUD_PROJECT_ID=your-project-id
+```
 
-## Learn More
+### 3. 開発サーバーの起動
 
-To learn more about Next.js, take a look at the following resources:
+#### HTTP版（localhost用）
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### HTTPS版（モバイルデバイス・WiFi経由アクセス用）
+```bash
+npm run dev:https
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. アクセス
 
-## Deploy on Vercel
+- **PC**: `http://localhost:3000` または `https://localhost:3000`
+- **モバイル**: `https://192.168.x.x:3000` (HTTPS必須)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📱 使い方
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **カメラをオン** - 「📷 カメラをオン」ボタンをクリック
+2. **カメラ切り替え** - 「🔄 インカメラ/アウトカメラ」ボタンで切り替え
+3. **写真撮影** - 「📸 写真を撮る」ボタンで撮影
+4. **テキスト解析** - 「📝 テキストを検出」ボタンで文字認識
+
+## 🔒 プライバシー
+
+- アプリ起動時はカメラがオフ状態
+- ユーザーが明示的にオンにした場合のみカメラが起動
+- カメラオフ時でも撮影済み画像と解析結果は保持
+
+## 🛠 技術スタック
+
+- **フロントエンド**: Next.js 15, TypeScript, React 19
+- **バックエンド**: Next.js API Routes
+- **AI/ML**: Google Cloud Vision API
+- **開発ツール**: ESLint, Tailwind CSS
+
+## 📂 プロジェクト構造
+
+```
+app/
+├── api/
+│   └── analyze-image/
+│       └── route.ts          # Vision API との通信
+├── components/
+│   ├── CameraButton.tsx      # 撮影ボタン
+│   ├── PhotoDisplay.tsx      # 画像表示
+│   └── ImageAnalysis.tsx     # テキスト解析
+├── globals.css
+├── layout.tsx
+└── page.tsx                  # メインページ
+```
+
+## 🌐 注意事項
+
+- **HTTPS必須**: モバイルデバイスからアクセスする場合はHTTPS環境が必要
+- **カメラ権限**: ブラウザでカメラの使用許可が必要
+- **API制限**: Google Cloud Vision APIの使用量・料金にご注意ください
