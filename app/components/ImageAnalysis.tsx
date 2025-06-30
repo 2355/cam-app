@@ -17,6 +17,7 @@ export default function ImageAnalysis({ photo }: ImageAnalysisProps) {
   const [detectedTexts, setDetectedTexts] = useState<DetectedText[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const analyzeImage = async () => {
     if (!photo) return;
@@ -51,6 +52,18 @@ export default function ImageAnalysis({ photo }: ImageAnalysisProps) {
       setError('ネットワークエラーが発生しました');
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    if (!fullText) return;
+    
+    try {
+      await navigator.clipboard.writeText(fullText);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // 2秒後にリセット
+    } catch (err) {
+      console.error('Failed to copy text:', err);
     }
   };
 
@@ -129,13 +142,35 @@ export default function ImageAnalysis({ photo }: ImageAnalysisProps) {
               border: '1px solid #dee2e6',
               borderRadius: '6px'
             }}>
-              <h4 style={{
-                margin: '0 0 0.5rem 0',
-                color: '#28a745',
-                fontSize: '0.9rem'
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.5rem'
               }}>
-                全体のテキスト:
-              </h4>
+                <h4 style={{
+                  margin: '0',
+                  color: '#28a745',
+                  fontSize: '0.9rem'
+                }}>
+                  全体のテキスト:
+                </h4>
+                <button
+                  onClick={copyToClipboard}
+                  style={{
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    backgroundColor: isCopied ? '#28a745' : '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  {isCopied ? '✓ コピー済み' : '📋 コピー'}
+                </button>
+              </div>
               <p style={{
                 margin: 0,
                 whiteSpace: 'pre-wrap',
